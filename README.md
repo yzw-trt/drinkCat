@@ -1,6 +1,5 @@
 # DrinkCat · 喝水喵
 
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)](LICENSE)
 
 一款基于 **Python + PyQt6** 的 Windows 桌面小工具：半透明置顶浮窗记录饮水、联网获取饮水建议与天气文案、系统托盘与超时提醒，并在达成当日目标时给予正向反馈。
 
@@ -106,17 +105,6 @@ drinkCat/
 
 ---
 
-## 开源协议（禁止商用）
-
-本仓库采用 **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/)**（简称 **PolyForm 非商业许可**），全文见仓库根目录 [`LICENSE`](LICENSE)。
-
-**要点（非法律意见，以英文原文为准）：**
-
-- ✅ **允许**：个人学习、研究、爱好、非营利/教育/公立科研/政府等机构的非商业使用；在许可范围内使用、修改与再分发（须附带相同许可与声明）。
-- ❌ **不允许**：以**营利或商业目的**使用本软件（例如收费分发、嵌入商业产品或服务、公司内部营利性运营等，除非另行取得作者书面商业授权）。
-
-若你需要商业授权，请通过 GitHub Issue 与维护者联系。  
-可将 `LICENSE` 顶部的 `Copyright (c) 2026 DrinkCat contributors` 改为你的姓名或组织名。
 
 ---
 
