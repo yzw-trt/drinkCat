@@ -54,6 +54,14 @@ class DrinkCatApp:
         self._timer.timeout.connect(self._tick)
         self._timer.start(15_000)
 
+        self._advice_refresh_timer = QTimer()
+        # 每小时重新拉取建议与天气（优先百度页），更新文案与天气图标
+        self._advice_refresh_timer.setInterval(60 * 60 * 1000)
+        self._advice_refresh_timer.timeout.connect(self._periodic_refresh_advice)
+        self._advice_refresh_timer.start()
+
+        # 每次启动重新拉取天气与建议，不用昨日同日的磁盘缓存
+        self._state.cached_advice_day = ""
         self._refresh_advice()
         self._restore_float_geometry()
         self._apply_float_visibility()
@@ -155,10 +163,13 @@ class DrinkCatApp:
         self._advice_detail = wa.detail
         save_state(self._state)
 
-    def _force_refresh_advice(self) -> None:
+    def _periodic_refresh_advice(self) -> None:
         self._state.cached_advice_day = ""
         self._refresh_advice()
         self._refresh_ui()
+
+    def _force_refresh_advice(self) -> None:
+        self._periodic_refresh_advice()
         self._tray.showMessage("DrinkCat", "已重新获取今日饮水建议。", QSystemTrayIcon.MessageIcon.Information, 2500)
 
     def _last_drink_dt(self) -> datetime | None:
@@ -213,7 +224,7 @@ class DrinkCatApp:
         self._maybe_celebrate_goal()
 
     def _open_settings(self) -> None:
-        dlg = SettingsDialog(self._state.settings, None)
+        dlg = SettingsDialog(self._state.settings, None, on_clear_all_data=self._clear_all_user_data)
         new_s = apply_from_dialog(self._state.settings, dlg)
         if new_s is None:
             return
@@ -236,14 +247,31 @@ class DrinkCatApp:
             return "上次记录：今天还没有记录"
         return f"上次记录：{d.strftime('%H:%M')}"
 
+    def _since_last_drink_line(self) -> str:
+        ref = self._reference_last_drink()
+        mins = max(0, int((datetime.now() - ref).total_seconds() // 60))
+        if self._last_drink_dt():
+            return f"距上次喝水：约 {mins} 分钟"
+        return f"距上次喝水：尚无记录（自本次启动约 {mins} 分钟）"
+
+    def _clear_all_user_data(self) -> None:
+        self._state.clear_user_data()
+        self._session_start = datetime.now()
+        self._last_reminder_at = None
+        save_state(self._state)
+        self._refresh_advice()
+        self._refresh_ui()
+
     def _refresh_ui(self) -> None:
-        goal, interval = self._effective_goal_interval()
+        goal, _ = self._effective_goal_interval()
+        c = self._state.cached_advice
         self._float.update_display(
             self._state.today_total_ml,
             goal,
-            interval,
+            self._since_last_drink_line(),
             self._last_drink_line(),
             self._advice_detail or "正在获取天气与饮水建议…",
+            weather_icon_url=c.get("weather_icon_url") if isinstance(c.get("weather_icon_url"), str) else None,
         )
         self._update_tray_appearance()
 

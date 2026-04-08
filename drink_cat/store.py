@@ -58,6 +58,15 @@ class State:
         self.today_total_ml += ml
         self.last_drink_iso = datetime.now().isoformat(timespec="seconds")
 
+    def clear_user_data(self) -> None:
+        """清空饮水记录与联网建议缓存（保留设置项）。"""
+        self.today_total_ml = 0
+        self.last_drink_iso = None
+        self.cached_advice = {}
+        self.cached_advice_day = ""
+        self.celebrated_goal_day = ""
+        self.touch_day()
+
 
 def default_state() -> State:
     s = State()
